@@ -38,7 +38,7 @@ fn or_empty(condition: bool, text: &str) -> &str {
     }
 }
 
-fn is_control_key(key: Key<'static>) -> Option<&str> {
+fn is_control_key(shift: bool, key: Key<'static>) -> Option<&str> {
     match key {
         Key::Backspace => Some("BS"),
         Key::Escape => Some("Esc"),
@@ -64,6 +64,7 @@ fn is_control_key(key: Key<'static>) -> Option<&str> {
         Key::End => Some("End"),
         Key::PageUp => Some("PageUp"),
         Key::PageDown => Some("PageDown"),
+        Key::Tab if shift => Some("Tab"),
         _ => None,
     }
 }
@@ -157,7 +158,9 @@ impl KeyboardManager {
                         if key_event.state == ElementState::Pressed {
                             // Determine if this key event represents a key which won't ever
                             // present text.
-                            if let Some(key_text) = is_control_key(key_event.logical_key) {
+                            if let Some(key_text) =
+                                is_control_key(self.shift, key_event.logical_key)
+                            {
                                 let keybinding_string =
                                     self.format_keybinding_string(true, true, key_text);
 
