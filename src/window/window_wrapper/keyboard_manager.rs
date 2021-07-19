@@ -188,6 +188,7 @@ fn is_control_key(key: Key<'static>) -> Option<&str> {
         Key::End => Some("End"),
         Key::PageUp => Some("PageUp"),
         Key::PageDown => Some("PageDown"),
+        Key::Tab => Some("Tab"),
         _ => None,
     }
 }
