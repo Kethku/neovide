@@ -33,7 +33,7 @@ use crate::{
     editor::WindowCommand,
     redraw_scheduler::REDRAW_SCHEDULER,
     renderer::Renderer,
-    settings::{WindowGeometry, SETTINGS},
+    settings::{maybe_save_window_size, WindowGeometry, SETTINGS},
 };
 use image::{load_from_memory, GenericImageView, Pixel};
 use keyboard_manager::KeyboardManager;
@@ -274,6 +274,7 @@ pub fn start_loop(
 
     event_loop.run(move |e, _window_target, control_flow| {
         if !running.load(Ordering::Relaxed) {
+            maybe_save_window_size(window_wrapper.saved_inner_size, &window_wrapper.renderer);
             std::process::exit(0);
         }
 
