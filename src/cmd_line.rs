@@ -17,6 +17,8 @@ pub struct CmdLineSettings {
     pub multi_grid: bool,
     pub maximized: bool,
     pub frameless: bool,
+    pub wayland_app_id: String,
+    pub x11_wm_class: String,
 }
 
 impl Default for CmdLineSettings {
@@ -34,6 +36,8 @@ impl Default for CmdLineSettings {
             multi_grid: false,
             maximized: false,
             frameless: false,
+            wayland_app_id: String::new(),
+            x11_wm_class: String::new(),
         }
     }
 }
@@ -76,7 +80,11 @@ pub fn handle_command_line_arguments() -> Result<(), String> {
             .long("frameless")
             .help("Removes the window frame. NOTE: Window might not be resizable after this setting is enabled.")
         )
-        .arg(Arg::with_name("wsl").long("wsl").help("Run in WSL"))
+        .arg(
+            Arg::with_name("wsl")
+                .long("wsl")
+                .help("Run in WSL")
+        )
         .arg(
             Arg::with_name("remote_tcp")
                 .long("remote-tcp")
@@ -101,6 +109,16 @@ pub fn handle_command_line_arguments() -> Result<(), String> {
                 .takes_value(true)
                 .last(true)
                 .help("Specify Arguments to pass down to neovim"),
+        )
+        .arg(
+            Arg::with_name("wayland_app_id")
+                .long("wayland-app-id")
+                .takes_value(true)
+        )
+        .arg(
+            Arg::with_name("x11_wm_class")
+                .long("x11-wm-class")
+                .takes_value(true)
         );
 
     let matches = clapp.get_matches();
@@ -132,6 +150,20 @@ pub fn handle_command_line_arguments() -> Result<(), String> {
         wsl: matches.is_present("wsl"),
         frameless: matches.is_present("frameless") || std::env::var("NEOVIDE_FRAMELESS").is_ok(),
         geometry: parse_window_geometry(matches.value_of("geometry").map(|i| i.to_owned()))?,
+        wayland_app_id: match std::env::var("NEOVIDE_APP_ID") {
+            Ok(val) => val,
+            Err(_) => matches
+                .value_of("wayland_app_id")
+                .unwrap_or("neovide")
+                .to_string(),
+        },
+        x11_wm_class: match std::env::var("NEOVIDE_WM_CLASS") {
+            Ok(val) => val,
+            Err(_) => matches
+                .value_of("x11_wm_class")
+                .unwrap_or("neovide")
+                .to_string(),
+        },
     });
     Ok(())
 }
